@@ -14,6 +14,8 @@ public record SearchCriteria(
     int travellers,
     String tripType,
     Integer preferredHotelRating,
+    String travelProductType,
+    String cabinClass,
     boolean exactMatch
 ) {
 }

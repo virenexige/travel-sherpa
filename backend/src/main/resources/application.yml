@@ -1,6 +1,22 @@
 spring:
   application:
     name: ai-travel-smart-planner
+  ai:
+    mcp:
+      client:
+        enabled: ${MCP_CLIENT_ENABLED:false}
+        name: smart-travel-planner-mcp-client
+        version: 1.0.0
+        request-timeout: ${MCP_CLIENT_REQUEST_TIMEOUT:10s}
+        type: SYNC
+        toolcallback:
+          enabled: true
+        stdio:
+          servers-configuration: ${MCP_STDIO_SERVERS_CONFIG:}
+        sse:
+          connections: {}
+        streamable-http:
+          connections: {}
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/smart_travel_planner}
     username: ${DB_USERNAME:postgres}
@@ -26,6 +42,16 @@ app:
       api-key: ${BOOKING_API_KEY:}
     skyscanner:
       api-key: ${SKYSCANNER_API_KEY:}
+    aviationstack:
+      enabled: ${AVIATIONSTACK_ENABLED:false}
+      api-key: ${AVIATIONSTACK_API_KEY:}
+      base-url: ${AVIATIONSTACK_BASE_URL:https://api.aviationstack.com/v1}
+      monthly-limit: ${AVIATIONSTACK_MONTHLY_LIMIT:80}
+    serpapi:
+      enabled: ${SERPAPI_ENABLED:false}
+      api-key: ${SERPAPI_API_KEY:}
+      base-url: ${SERPAPI_BASE_URL:https://serpapi.com/search.json}
+      monthly-limit: ${SERPAPI_MONTHLY_LIMIT:200}
   scheduler:
     travel-watch-refresh-cron: ${TRAVEL_WATCH_REFRESH_CRON:0 0 */6 * * *}
   alerts:

@@ -25,4 +25,11 @@ public class TravelWatchScheduler {
         log.info("Refreshing {} active travel watches", active.size());
         active.forEach(searches::runSearch);
     }
+
+    @Scheduled(cron = "0 30 6 * * *")
+    public void refreshBucketListWatchesDaily() {
+        var activeBucketList = watches.findByStatusAndBucketList(TravelWatchStatus.ACTIVE, true);
+        log.info("Refreshing {} active bucket-list travel watches", activeBucketList.size());
+        activeBucketList.forEach(searches::runSearch);
+    }
 }

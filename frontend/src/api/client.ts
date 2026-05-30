@@ -1,4 +1,4 @@
-import type { PriceHistoryPoint, Recommendation, SearchResult, TravelWatch, TravelWatchRequest } from './types';
+import type { McpContext, PriceHistoryPoint, Recommendation, SearchActivityLog, SearchResult, TravelWatch, TravelWatchRequest } from './types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
 const TOKEN_KEY = 'smart-travel-token';
@@ -46,5 +46,7 @@ export const api = {
   searchNow: (id: string) => request<SearchResult[]>(`/api/travel-watches/${id}/search-now`, { method: 'POST' }),
   results: (id: string) => request<SearchResult[]>(`/api/travel-watches/${id}/results`),
   priceHistory: (id: string) => request<PriceHistoryPoint[]>(`/api/travel-watches/${id}/price-history`),
-  recommendations: (id: string) => request<Recommendation[]>(`/api/travel-watches/${id}/recommendations`)
+  recommendations: (id: string) => request<Recommendation[]>(`/api/travel-watches/${id}/recommendations`),
+  mcpContext: (id: string) => request<McpContext>(`/api/travel-watches/${id}/mcp-context`),
+  searchLogs: (id: string) => request<SearchActivityLog[]>(`/api/travel-watches/${id}/search-logs`)
 };

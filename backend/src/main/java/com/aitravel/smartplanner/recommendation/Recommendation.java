@@ -1,6 +1,7 @@
 package com.aitravel.smartplanner.recommendation;
 
 import com.aitravel.smartplanner.tripwatch.TravelWatch;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -20,6 +21,7 @@ public class Recommendation {
     @JoinColumn(name = "travel_watch_id")
     private TravelWatch travelWatch;
     private String title;
+    @Column(columnDefinition = "text")
     private String explanation;
     private String recommendationType;
     private BigDecimal confidenceScore;

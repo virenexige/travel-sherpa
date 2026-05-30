@@ -9,4 +9,5 @@ public interface TravelWatchRepository extends JpaRepository<TravelWatch, UUID> 
     List<TravelWatch> findByUser_EmailOrderByCreatedAtDesc(String email);
     Optional<TravelWatch> findByIdAndUser_Email(UUID id, String email);
     List<TravelWatch> findByStatus(TravelWatchStatus status);
+    List<TravelWatch> findByStatusAndBucketList(TravelWatchStatus status, boolean bucketList);
 }

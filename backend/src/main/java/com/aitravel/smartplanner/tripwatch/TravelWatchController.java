@@ -1,17 +1,22 @@
 package com.aitravel.smartplanner.tripwatch;
 
+import com.aitravel.smartplanner.ai.McpTravelContextService;
 import com.aitravel.smartplanner.pricing.PriceHistoryRepository;
 import com.aitravel.smartplanner.pricing.dto.PriceHistoryResponse;
 import com.aitravel.smartplanner.recommendation.RecommendationRepository;
 import com.aitravel.smartplanner.recommendation.dto.RecommendationResponse;
 import com.aitravel.smartplanner.search.TravelSearchResultRepository;
+import com.aitravel.smartplanner.search.SearchActivityLogRepository;
 import com.aitravel.smartplanner.search.TravelSearchService;
+import com.aitravel.smartplanner.search.dto.SearchActivityLogResponse;
 import com.aitravel.smartplanner.search.dto.SearchResultResponse;
 import com.aitravel.smartplanner.security.AuthenticatedUser;
 import com.aitravel.smartplanner.tripwatch.dto.TravelWatchRequest;
 import com.aitravel.smartplanner.tripwatch.dto.TravelWatchResponse;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,17 +35,22 @@ public class TravelWatchController {
     private final TravelWatchService watches;
     private final TravelSearchService searches;
     private final TravelSearchResultRepository results;
+    private final SearchActivityLogRepository searchLogs;
     private final PriceHistoryRepository priceHistory;
     private final RecommendationRepository recommendations;
+    private final McpTravelContextService mcpTravelContext;
 
     public TravelWatchController(TravelWatchService watches, TravelSearchService searches,
                                  TravelSearchResultRepository results, PriceHistoryRepository priceHistory,
-                                 RecommendationRepository recommendations) {
+                                 RecommendationRepository recommendations, SearchActivityLogRepository searchLogs,
+                                 McpTravelContextService mcpTravelContext) {
         this.watches = watches;
         this.searches = searches;
         this.results = results;
+        this.searchLogs = searchLogs;
         this.priceHistory = priceHistory;
         this.recommendations = recommendations;
+        this.mcpTravelContext = mcpTravelContext;
     }
 
     @PostMapping
@@ -108,6 +118,30 @@ public class TravelWatchController {
             .map(item -> new RecommendationResponse(item.getId(), item.getTitle(), item.getExplanation(),
                 item.getRecommendationType(), item.getConfidenceScore(), item.getEstimatedSaving(), item.getCreatedAt()))
             .toList();
+    }
+
+    @GetMapping("/{id}/search-logs")
+    List<SearchActivityLogResponse> searchLogs(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable UUID id) {
+        watches.get(user.email(), id);
+        LinkedHashMap<UUID, com.aitravel.smartplanner.search.SearchActivityLog> merged = new LinkedHashMap<>();
+        searchLogs.findTop20ByTravelWatch_IdAndSearchTypeOrderBySearchedAtDesc(id, "PROVIDER_SIGNAL")
+            .forEach(item -> merged.put(item.getId(), item));
+        searchLogs.findTop100ByTravelWatch_IdOrderBySearchedAtDesc(id)
+            .forEach(item -> merged.putIfAbsent(item.getId(), item));
+        return merged.values().stream()
+            .map(item -> new SearchActivityLogResponse(item.getId(), item.getProviderName(), item.getSearchType(),
+                item.getDepartureLocation(), item.getDestination(), item.getDepartureAirport(), item.getArrivalAirport(),
+                item.getStartDate(), item.getEndDate(), item.getStatus(), item.getOffersReturned(),
+                item.getCheapestPackagePrice(), item.getCurrency(), item.getMessage(), item.getSearchedAt()))
+            .toList();
+    }
+
+    @GetMapping("/{id}/mcp-context")
+    Map<String, Object> mcpContext(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable UUID id) {
+        TravelWatch watch = watches.get(user.email(), id);
+        return mcpTravelContext.destinationContext(watch)
+            .<Map<String, Object>>map(context -> Map.of("available", true, "context", context))
+            .orElseGet(() -> Map.of("available", false, "context", ""));
     }
 
     private SearchResultResponse toResultResponse(com.aitravel.smartplanner.search.TravelSearchResult item) {

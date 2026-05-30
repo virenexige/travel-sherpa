@@ -1,0 +1,16 @@
+.DS_Store
+
+# Java
+backend/target/
+backend/build/
+backend/.gradle/
+.gradle-home/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+
+# IDE
+.idea/
+.vscode/

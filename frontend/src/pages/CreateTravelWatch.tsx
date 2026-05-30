@@ -11,16 +11,15 @@ export default function CreateTravelWatch() {
   }
 
   return (
-    <div className="page narrow">
-      <header className="page-header">
+    <div className="page create-page">
+      <header className="page-header create-header">
         <div>
           <span className="eyebrow">New search</span>
-          <h1>Create Travel Watch</h1>
+          <h1>Plan a smarter trip</h1>
+          <p>Build a travel watch that searches flexible dates, nearby airports, and personalized alternatives.</p>
         </div>
       </header>
-      <section className="panel">
-        <TravelWatchForm onSubmit={create} />
-      </section>
+      <TravelWatchForm onSubmit={create} />
     </div>
   );
 }

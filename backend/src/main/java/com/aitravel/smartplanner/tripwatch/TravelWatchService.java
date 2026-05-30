@@ -32,6 +32,12 @@ public class TravelWatchService {
             request.destination(), request.startDate(), request.endDate(), request.travellers(),
             request.flexibilityDays(), request.maxBudget(), request.tripType(), request.preferredHotelRating(),
             TravelWatchStatus.ACTIVE, now, now));
+        watch.updateDateOptions(request.range2StartDate(), request.range2EndDate(), request.range3StartDate(),
+            request.range3EndDate(), request.startDaysEarly(), request.startDaysLate(),
+            request.finishDaysEarly(), request.finishDaysLate(), request.durationIncreaseDays());
+        watch.updateFlightPreferences(request.travelProductType(), request.cabinClass());
+        watch.updateBucketList(request.bucketList(), request.bucketListName(), request.earliestStartDate(),
+            request.latestEndDate(), request.notes());
         searches.runSearch(watch);
         return watch;
     }
@@ -53,6 +59,12 @@ public class TravelWatchService {
         watch.update(request.departureLocation(), request.destination(), request.startDate(), request.endDate(),
             request.travellers(), request.flexibilityDays(), request.maxBudget(), request.tripType(),
             request.preferredHotelRating());
+        watch.updateDateOptions(request.range2StartDate(), request.range2EndDate(), request.range3StartDate(),
+            request.range3EndDate(), request.startDaysEarly(), request.startDaysLate(),
+            request.finishDaysEarly(), request.finishDaysLate(), request.durationIncreaseDays());
+        watch.updateFlightPreferences(request.travelProductType(), request.cabinClass());
+        watch.updateBucketList(request.bucketList(), request.bucketListName(), request.earliestStartDate(),
+            request.latestEndDate(), request.notes());
         return watch;
     }
 
@@ -78,6 +90,17 @@ public class TravelWatchService {
     private void validateDates(TravelWatchRequest request) {
         if (!request.endDate().isAfter(request.startDate())) {
             throw new IllegalArgumentException("End date must be after start date");
+        }
+        validateOptionalRange(request.range2StartDate(), request.range2EndDate(), "Range 2");
+        validateOptionalRange(request.range3StartDate(), request.range3EndDate(), "Range 3");
+    }
+
+    private void validateOptionalRange(java.time.LocalDate startDate, java.time.LocalDate endDate, String label) {
+        if (startDate == null && endDate == null) {
+            return;
+        }
+        if (startDate == null || endDate == null || !endDate.isAfter(startDate)) {
+            throw new IllegalArgumentException(label + " end date must be after start date");
         }
     }
 }

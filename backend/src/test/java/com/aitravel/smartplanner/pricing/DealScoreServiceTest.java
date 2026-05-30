@@ -23,7 +23,7 @@ class DealScoreServiceTest {
             LocalDate.now().plusDays(20), LocalDate.now().plusDays(27), 3, 3,
             new BigDecimal("3000"), "Family + Nature", 4, TravelWatchStatus.ACTIVE, Instant.now(), Instant.now());
         SearchCriteria criteria = new SearchCriteria(watch.getId(), "London", "Zurich", "LHR", "ZRH",
-            watch.getStartDate(), watch.getEndDate(), 3, watch.getTripType(), 4, true);
+            watch.getStartDate(), watch.getEndDate(), 3, watch.getTripType(), 4, "PACKAGE", "ALL", true);
         ProviderOffer offer = new ProviderOffer("Mock", "Zurich", "LHR", "ZRH", new BigDecimal("900"),
             new BigDecimal("1200"), new BigDecimal("2100"), "GBP", "https://example.com");
 

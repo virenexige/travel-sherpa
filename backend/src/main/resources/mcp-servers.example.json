@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "travel-context": {
+      "command": "node",
+      "args": [
+        "/absolute/path/to/your/travel-mcp-server.js"
+      ],
+      "env": {
+        "GOOGLE_PLACES_API_KEY": "${GOOGLE_PLACES_API_KEY}",
+        "OPENTRIPMAP_API_KEY": "${OPENTRIPMAP_API_KEY}"
+      }
+    }
+  }
+}

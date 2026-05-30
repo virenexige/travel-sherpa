@@ -7,4 +7,8 @@ public interface TravelProviderClient {
     List<ProviderOffer> searchFlights(SearchCriteria criteria);
     List<ProviderOffer> searchHotels(SearchCriteria criteria);
     List<ProviderOffer> searchPackages(SearchCriteria criteria);
+
+    default List<ProviderSignal> searchSignals(SearchCriteria criteria) {
+        return List.of();
+    }
 }

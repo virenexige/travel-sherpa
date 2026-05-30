@@ -36,8 +36,10 @@ public class MockTravelProviderClient implements TravelProviderClient {
             + criteria.startDate()).hashCode());
         BigDecimal destinationFactor = BigDecimal.valueOf(80 + seed % 95);
         BigDecimal travellerFactor = BigDecimal.valueOf(criteria.travellers());
+        BigDecimal cabinFactor = cabinFactor(criteria.cabinClass());
         BigDecimal flight = destinationFactor.multiply(travellerFactor)
             .add(BigDecimal.valueOf((seed % 7) * 22L))
+            .multiply(cabinFactor)
             .multiply(multiplier);
         BigDecimal hotelNight = BigDecimal.valueOf(95 + seed % 160)
             .add(BigDecimal.valueOf((criteria.preferredHotelRating() == null ? 3 : criteria.preferredHotelRating()) * 18L));
@@ -61,5 +63,14 @@ public class MockTravelProviderClient implements TravelProviderClient {
 
     private BigDecimal money(BigDecimal value) {
         return value.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal cabinFactor(String cabinClass) {
+        return switch (cabinClass == null ? "ALL" : cabinClass) {
+            case "PREMIUM_ECONOMY" -> new BigDecimal("1.55");
+            case "BUSINESS" -> new BigDecimal("2.85");
+            case "FIRST" -> new BigDecimal("4.20");
+            default -> BigDecimal.ONE;
+        };
     }
 }
