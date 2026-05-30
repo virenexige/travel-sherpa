@@ -1,0 +1,29 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: smart-travel-backend
+    environment:
+      DB_URL: jdbc:postgresql://host.docker.internal:5432/smart_travel_planner
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: change-me-change-me-change-me-change-me
+      AVIATIONSTACK_ENABLED: "true"
+      AVIATIONSTACK_API_KEY: ${AVIATIONSTACK_API_KEY:-}
+      AVIATIONSTACK_MONTHLY_LIMIT: "80"
+      SERPAPI_ENABLED: "true"
+      SERPAPI_API_KEY: ${SERPAPI_API_KEY:-}
+      SERPAPI_MONTHLY_LIMIT: "200"
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:8080
+    container_name: smart-travel-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
