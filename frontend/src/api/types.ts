@@ -16,6 +16,7 @@ export type TravelWatchRequest = {
   finishDaysEarly: number;
   finishDaysLate: number;
   durationIncreaseDays: number;
+  tripDurationDays: number;
   maxBudget: number;
   tripType: string;
   preferredHotelRating: number;

@@ -8,6 +8,7 @@ import com.aitravel.smartplanner.user.AppUser;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
@@ -26,6 +27,7 @@ class SearchCombinationServiceTest {
         assertThat(combinations).isNotEmpty();
         assertThat(combinations).anyMatch(criteria -> criteria.destination().equals("Lucerne"));
         assertThat(combinations).anyMatch(criteria -> criteria.departureAirport().equals("LGW"));
-        assertThat(combinations).anyMatch(criteria -> criteria.startDate().equals(LocalDate.of(2026, 8, 7)));
+        assertThat(combinations).anyMatch(criteria -> criteria.startDate().equals(LocalDate.of(2026, 8, 10)));
+        assertThat(combinations).allMatch(criteria -> ChronoUnit.DAYS.between(criteria.startDate(), criteria.endDate()) == 7);
     }
 }

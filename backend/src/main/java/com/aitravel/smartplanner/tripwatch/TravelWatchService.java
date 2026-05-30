@@ -34,7 +34,8 @@ public class TravelWatchService {
             TravelWatchStatus.ACTIVE, now, now));
         watch.updateDateOptions(request.range2StartDate(), request.range2EndDate(), request.range3StartDate(),
             request.range3EndDate(), request.startDaysEarly(), request.startDaysLate(),
-            request.finishDaysEarly(), request.finishDaysLate(), request.durationIncreaseDays());
+            request.finishDaysEarly(), request.finishDaysLate(), request.durationIncreaseDays(),
+            request.tripDurationDays());
         watch.updateFlightPreferences(request.travelProductType(), request.cabinClass());
         watch.updateBucketList(request.bucketList(), request.bucketListName(), request.earliestStartDate(),
             request.latestEndDate(), request.notes());
@@ -61,7 +62,8 @@ public class TravelWatchService {
             request.preferredHotelRating());
         watch.updateDateOptions(request.range2StartDate(), request.range2EndDate(), request.range3StartDate(),
             request.range3EndDate(), request.startDaysEarly(), request.startDaysLate(),
-            request.finishDaysEarly(), request.finishDaysLate(), request.durationIncreaseDays());
+            request.finishDaysEarly(), request.finishDaysLate(), request.durationIncreaseDays(),
+            request.tripDurationDays());
         watch.updateFlightPreferences(request.travelProductType(), request.cabinClass());
         watch.updateBucketList(request.bucketList(), request.bucketListName(), request.earliestStartDate(),
             request.latestEndDate(), request.notes());
@@ -91,16 +93,22 @@ public class TravelWatchService {
         if (!request.endDate().isAfter(request.startDate())) {
             throw new IllegalArgumentException("End date must be after start date");
         }
-        validateOptionalRange(request.range2StartDate(), request.range2EndDate(), "Range 2");
-        validateOptionalRange(request.range3StartDate(), request.range3EndDate(), "Range 3");
+        if (request.startDate().plusDays(request.tripDurationDays()).isAfter(request.endDate())) {
+            throw new IllegalArgumentException("Trip length must fit inside Range 1");
+        }
+        validateOptionalRange(request.range2StartDate(), request.range2EndDate(), request.tripDurationDays(), "Range 2");
+        validateOptionalRange(request.range3StartDate(), request.range3EndDate(), request.tripDurationDays(), "Range 3");
     }
 
-    private void validateOptionalRange(java.time.LocalDate startDate, java.time.LocalDate endDate, String label) {
+    private void validateOptionalRange(java.time.LocalDate startDate, java.time.LocalDate endDate, int tripDurationDays, String label) {
         if (startDate == null && endDate == null) {
             return;
         }
         if (startDate == null || endDate == null || !endDate.isAfter(startDate)) {
             throw new IllegalArgumentException(label + " end date must be after start date");
+        }
+        if (startDate.plusDays(tripDurationDays).isAfter(endDate)) {
+            throw new IllegalArgumentException("Trip length must fit inside " + label);
         }
     }
 }

@@ -16,7 +16,7 @@ export default function DestinationComparisonChart({ results }: { results: Searc
           <XAxis dataKey="destination" />
           <YAxis />
           <Tooltip />
-          <Bar dataKey="packagePrice" fill="#0f766e" radius={[5, 5, 0, 0]} />
+          <Bar dataKey="packagePrice" fill="#2563eb" radius={[5, 5, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

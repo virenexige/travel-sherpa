@@ -35,6 +35,7 @@ export default function TravelWatchForm({ onSubmit }: { onSubmit: (payload: Trav
     finishDaysEarly: 0,
     finishDaysLate: 0,
     durationIncreaseDays: 2,
+    tripDurationDays: 7,
     maxBudget: 3000,
     tripType: 'Family + Nature',
     preferredHotelRating: 4,
@@ -60,11 +61,12 @@ export default function TravelWatchForm({ onSubmit }: { onSubmit: (payload: Trav
       );
       await onSubmit({
         ...form,
+        endDate: ensureWindowFits(form.startDate, form.endDate, form.tripDurationDays),
+        range2EndDate: visibleRangeCount >= 2 && form.range2StartDate && form.range2EndDate ? ensureWindowFits(form.range2StartDate, form.range2EndDate, form.tripDurationDays) : null,
+        range3EndDate: visibleRangeCount >= 3 && form.range3StartDate && form.range3EndDate ? ensureWindowFits(form.range3StartDate, form.range3EndDate, form.tripDurationDays) : null,
         flexibilityDays: maxFlexibility,
         range2StartDate: visibleRangeCount >= 2 && form.range2StartDate ? form.range2StartDate : null,
-        range2EndDate: visibleRangeCount >= 2 && form.range2EndDate ? form.range2EndDate : null,
         range3StartDate: visibleRangeCount >= 3 && form.range3StartDate ? form.range3StartDate : null,
-        range3EndDate: visibleRangeCount >= 3 && form.range3EndDate ? form.range3EndDate : null
       });
     } finally {
       setSubmitting(false);
@@ -139,11 +141,33 @@ export default function TravelWatchForm({ onSubmit }: { onSubmit: (payload: Trav
 
   function dateSummary() {
     const ranges = [
-      `Range 1: ${form.startDate} to ${form.endDate}`,
+      `${form.tripDurationDays} day trip inside Range 1: ${form.startDate} to ${form.endDate}`,
       visibleRangeCount >= 2 && form.range2StartDate && form.range2EndDate ? `Range 2: ${form.range2StartDate} to ${form.range2EndDate}` : '',
       visibleRangeCount >= 3 && form.range3StartDate && form.range3EndDate ? `Range 3: ${form.range3StartDate} to ${form.range3EndDate}` : ''
     ].filter(Boolean);
     return ranges.join(' · ');
+  }
+
+  function addDays(date: string, days: number) {
+    const next = new Date(`${date}T00:00:00`);
+    next.setDate(next.getDate() + days);
+    return next.toISOString().slice(0, 10);
+  }
+
+  function ensureWindowFits(startDate: string, endDate: string, tripDurationDays: number) {
+    const minimumEnd = addDays(startDate, tripDurationDays);
+    return endDate < minimumEnd ? minimumEnd : endDate;
+  }
+
+  function updateTripDuration(days: number) {
+    const tripDurationDays = Math.max(1, Math.min(60, days));
+    setForm({
+      ...form,
+      tripDurationDays,
+      endDate: ensureWindowFits(form.startDate, form.endDate, tripDurationDays),
+      range2EndDate: form.range2StartDate && form.range2EndDate ? ensureWindowFits(form.range2StartDate, form.range2EndDate, tripDurationDays) : form.range2EndDate,
+      range3EndDate: form.range3StartDate && form.range3EndDate ? ensureWindowFits(form.range3StartDate, form.range3EndDate, tripDurationDays) : form.range3EndDate
+    });
   }
 
   return (
@@ -210,25 +234,26 @@ export default function TravelWatchForm({ onSubmit }: { onSubmit: (payload: Trav
             <button className="compact-action" type="button" onClick={() => setVisibleRangeCount(visibleRangeCount + 1)}><Plus size={18} />Add range</button>
           )}
         </div>
+        <label className="range-control slider-label"><span>Trip length <strong>{form.tripDurationDays} days</strong></span><input type="range" min={1} max={30} value={form.tripDurationDays} onChange={e => updateTripDuration(Number(e.target.value))} /></label>
         <div className="date-ranges">
           <div className="date-range-row">
             <strong>Range 1</strong>
-            <label>Start<input type="date" min={today} value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })} required /></label>
-            <label>End<input type="date" min={form.startDate} value={form.endDate} onChange={e => setForm({ ...form, endDate: e.target.value })} required /></label>
+            <label>Window start<input type="date" min={today} value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value, endDate: ensureWindowFits(e.target.value, form.endDate, form.tripDurationDays) })} required /></label>
+            <label>Window end<input type="date" min={addDays(form.startDate, form.tripDurationDays)} value={form.endDate} onChange={e => setForm({ ...form, endDate: e.target.value })} required /></label>
           </div>
           {visibleRangeCount >= 2 && (
             <div className="date-range-row">
               <strong>Range 2</strong>
-              <label>Start<input type="date" min={today} value={form.range2StartDate ?? ''} onChange={e => setForm({ ...form, range2StartDate: e.target.value })} required /></label>
-              <label>End<input type="date" min={form.range2StartDate || today} value={form.range2EndDate ?? ''} onChange={e => setForm({ ...form, range2EndDate: e.target.value })} required /></label>
+              <label>Window start<input type="date" min={today} value={form.range2StartDate ?? ''} onChange={e => setForm({ ...form, range2StartDate: e.target.value, range2EndDate: form.range2EndDate ? ensureWindowFits(e.target.value, form.range2EndDate, form.tripDurationDays) : '' })} required /></label>
+              <label>Window end<input type="date" min={form.range2StartDate ? addDays(form.range2StartDate, form.tripDurationDays) : today} value={form.range2EndDate ?? ''} onChange={e => setForm({ ...form, range2EndDate: e.target.value })} required /></label>
               <button className="icon-button" type="button" aria-label="Remove range 2" onClick={() => removeOptionalRange(2)}><X size={18} /></button>
             </div>
           )}
           {visibleRangeCount >= 3 && (
             <div className="date-range-row">
               <strong>Range 3</strong>
-              <label>Start<input type="date" min={today} value={form.range3StartDate ?? ''} onChange={e => setForm({ ...form, range3StartDate: e.target.value })} required /></label>
-              <label>End<input type="date" min={form.range3StartDate || today} value={form.range3EndDate ?? ''} onChange={e => setForm({ ...form, range3EndDate: e.target.value })} required /></label>
+              <label>Window start<input type="date" min={today} value={form.range3StartDate ?? ''} onChange={e => setForm({ ...form, range3StartDate: e.target.value, range3EndDate: form.range3EndDate ? ensureWindowFits(e.target.value, form.range3EndDate, form.tripDurationDays) : '' })} required /></label>
+              <label>Window end<input type="date" min={form.range3StartDate ? addDays(form.range3StartDate, form.tripDurationDays) : today} value={form.range3EndDate ?? ''} onChange={e => setForm({ ...form, range3EndDate: e.target.value })} required /></label>
               <button className="icon-button" type="button" aria-label="Remove range 3" onClick={() => removeOptionalRange(3)}><X size={18} /></button>
             </div>
           )}

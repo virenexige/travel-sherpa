@@ -80,7 +80,7 @@ export default function TravelWatchDetails() {
         <div>
           <span className="eyebrow">{watch.data.status}</span>
           <h1>{watch.data.departureLocation} to {watch.data.destination}</h1>
-          <p>{dateRanges.map(([label, start, end]) => `${label}: ${start} to ${end}`).join(' · ')} · start {watch.data.startDaysEarly} days early / {watch.data.startDaysLate} days later · finish {watch.data.finishDaysEarly} days early / {watch.data.finishDaysLate} days later · duration +{watch.data.durationIncreaseDays} days · {watch.data.travellers} travellers · max budget £{watch.data.maxBudget} · {watch.data.tripType} · {formatCsv(watch.data.travelProductType)} · {formatCsv(watch.data.cabinClass)}{watch.data.bucketList ? ` · Bucket list: ${watch.data.bucketListName || watch.data.destination}` : ''}</p>
+          <p>{dateRanges.map(([label, start, end]) => `${label}: ${start} window ${end}`).join(' · ')} · {watch.data.tripDurationDays} day trip · start {watch.data.startDaysEarly} days early / {watch.data.startDaysLate} days later · finish {watch.data.finishDaysEarly} days early / {watch.data.finishDaysLate} days later · duration +{watch.data.durationIncreaseDays} days · {watch.data.travellers} travellers · max budget £{watch.data.maxBudget} · {watch.data.tripType} · {formatCsv(watch.data.travelProductType)} · {formatCsv(watch.data.cabinClass)}{watch.data.bucketList ? ` · Bucket list: ${watch.data.bucketListName || watch.data.destination}` : ''}</p>
         </div>
         <div className="actions">
           <button onClick={runSearch} disabled={busy}><RefreshCw size={18} />Search Now</button>

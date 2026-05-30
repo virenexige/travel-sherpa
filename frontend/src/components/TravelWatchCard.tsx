@@ -16,7 +16,7 @@ export default function TravelWatchCard({ watch }: { watch: TravelWatch }) {
         <h3>{watch.departureLocation} to {watch.destination}</h3>
       </div>
       <div className="watch-meta">
-        <span><CalendarDays size={16} />{ranges.map(([label, start, end]) => `${label}: ${start} to ${end}`).join(' · ')}</span>
+        <span><CalendarDays size={16} />{watch.tripDurationDays} day trip · {ranges.map(([label, start, end]) => `${label}: ${start} to ${end}`).join(' · ')}</span>
         <span><Users size={16} />{watch.travellers} travellers</span>
         <span><MapPin size={16} />{watch.tripType}</span>
       </div>

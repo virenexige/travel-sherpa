@@ -25,6 +25,7 @@ public final class TravelWatchMapper {
             watch.getFinishDaysEarly(),
             watch.getFinishDaysLate(),
             watch.getDurationIncreaseDays(),
+            watch.getTripDurationDays(),
             watch.getMaxBudget(),
             watch.getTripType(),
             watch.getPreferredHotelRating(),

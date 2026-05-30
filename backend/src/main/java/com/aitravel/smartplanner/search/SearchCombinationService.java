@@ -2,7 +2,6 @@ package com.aitravel.smartplanner.search;
 
 import com.aitravel.smartplanner.tripwatch.TravelWatch;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,11 +28,7 @@ public class SearchCombinationService {
         LocalDate baseEnd = watch.getEndDate();
         if (watch.isBucketList() && watch.getEarliestStartDate() != null && watch.getLatestEndDate() != null) {
             baseStart = watch.getEarliestStartDate();
-            long originalNights = Math.max(2, ChronoUnit.DAYS.between(watch.getStartDate(), watch.getEndDate()));
-            baseEnd = baseStart.plusDays(originalNights);
-            if (baseEnd.isAfter(watch.getLatestEndDate())) {
-                baseEnd = watch.getLatestEndDate();
-            }
+            baseEnd = watch.getLatestEndDate();
         }
         List<DateRange> selectedRanges = selectedRanges(watch, baseStart, baseEnd);
         List<String> destinations = new ArrayList<>();
@@ -43,46 +38,48 @@ public class SearchCombinationService {
         List<String> departureAirports = AIRPORTS.getOrDefault(normalize(watch.getDepartureLocation()), List.of(watch.getDepartureLocation()));
         Map<String, SearchCriteria> unique = new LinkedHashMap<>();
         for (DateRange range : selectedRanges) {
-            for (int startShift : dateShifts(watch.getStartDaysEarly(), watch.getStartDaysLate())) {
-                for (int finishShift : dateShifts(watch.getFinishDaysEarly(), watch.getFinishDaysLate())) {
-                    addCombinationsForShift(watch, destinations, departureAirports, unique, range, startShift, finishShift, 0);
+            for (int duration : durationOptions(watch)) {
+                LocalDate latestStart = range.endDate().minusDays(duration);
+                if (latestStart.isBefore(range.startDate())) {
+                    continue;
                 }
-                for (int durationIncrease : durationIncreases(watch.getDurationIncreaseDays())) {
-                    addCombinationsForShift(watch, destinations, departureAirports, unique, range, startShift, 0, durationIncrease);
+                for (LocalDate start = range.startDate(); !start.isAfter(latestStart); start = start.plusDays(1)) {
+                    addCombinationsForWindow(watch, destinations, departureAirports, unique, range, start, duration);
                 }
             }
         }
         return unique.values().stream().limit(320).toList();
     }
 
-    private void addCombinationsForShift(TravelWatch watch, List<String> destinations, List<String> departureAirports,
-                                         Map<String, SearchCriteria> unique, DateRange range,
-                                         int startShift, int finishShift, int durationIncrease) {
+    private void addCombinationsForWindow(TravelWatch watch, List<String> destinations, List<String> departureAirports,
+                                          Map<String, SearchCriteria> unique, DateRange range,
+                                          LocalDate start, int duration) {
         for (String destination : destinations) {
             List<String> arrivalAirports = AIRPORTS.getOrDefault(normalize(destination), List.of(destination));
-            LocalDate shiftedStart = range.startDate().plusDays(startShift);
-            LocalDate shiftedEnd = range.endDate().plusDays(finishShift + durationIncrease);
-            if (watch.isBucketList() && watch.getLatestEndDate() != null && shiftedEnd.isAfter(watch.getLatestEndDate())) {
+            LocalDate end = start.plusDays(duration);
+            if (watch.isBucketList() && watch.getLatestEndDate() != null && end.isAfter(watch.getLatestEndDate())) {
                 continue;
             }
-            boolean exact = startShift == 0 && finishShift == 0 && durationIncrease == 0
+            boolean exact = duration == watch.getTripDurationDays() && start.equals(range.startDate())
                 && range.primary() && destination.equals(watch.getDestination());
-            addStayVariant(unique, watch, destination, departureAirports, arrivalAirports, shiftedStart, shiftedEnd, exact);
-            addStayVariant(unique, watch, destination, departureAirports, arrivalAirports, shiftedStart, shiftedEnd.minusDays(1), false);
-            addStayVariant(unique, watch, destination, departureAirports, arrivalAirports, shiftedStart, shiftedEnd.plusDays(1), false);
+            addStayVariant(unique, watch, destination, departureAirports, arrivalAirports, start, end, exact);
         }
     }
 
-    private List<Integer> durationIncreases(int durationIncreaseDays) {
-        List<Integer> increases = new ArrayList<>();
-        if (durationIncreaseDays <= 0) {
-            return increases;
+    private List<Integer> durationOptions(TravelWatch watch) {
+        List<Integer> durations = new ArrayList<>();
+        int baseDuration = Math.max(1, watch.getTripDurationDays());
+        durations.add(baseDuration);
+        for (int i = 1; i <= watch.getFinishDaysEarly(); i++) {
+            if (baseDuration - i >= 1) {
+                durations.add(baseDuration - i);
+            }
         }
-        increases.add(durationIncreaseDays);
-        for (int i = 1; i < durationIncreaseDays; i++) {
-            increases.add(i);
+        int maxLonger = Math.max(watch.getFinishDaysLate(), watch.getDurationIncreaseDays());
+        for (int i = 1; i <= maxLonger; i++) {
+            durations.add(baseDuration + i);
         }
-        return increases;
+        return durations.stream().distinct().toList();
     }
 
     private void addStayVariant(Map<String, SearchCriteria> unique, TravelWatch watch, String destination,
@@ -103,24 +100,6 @@ public class SearchCombinationService {
                 }
             }
         }
-    }
-
-    private List<Integer> dateShifts(int startDaysEarly, int startDaysLate) {
-        List<Integer> shifts = new ArrayList<>();
-        shifts.add(0);
-        if (startDaysEarly > 0) {
-            shifts.add(-startDaysEarly);
-        }
-        if (startDaysLate > 0) {
-            shifts.add(startDaysLate);
-        }
-        for (int i = 1; i < startDaysEarly; i++) {
-            shifts.add(-i);
-        }
-        for (int i = 1; i < startDaysLate; i++) {
-            shifts.add(i);
-        }
-        return shifts;
     }
 
     private List<DateRange> selectedRanges(TravelWatch watch, LocalDate baseStart, LocalDate baseEnd) {

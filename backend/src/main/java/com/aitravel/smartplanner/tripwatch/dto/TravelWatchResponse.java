@@ -24,6 +24,7 @@ public record TravelWatchResponse(
     int finishDaysEarly,
     int finishDaysLate,
     int durationIncreaseDays,
+    int tripDurationDays,
     BigDecimal maxBudget,
     String tripType,
     Integer preferredHotelRating,

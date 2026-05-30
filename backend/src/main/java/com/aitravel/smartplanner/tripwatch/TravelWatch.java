@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Entity
@@ -47,6 +48,8 @@ public class TravelWatch {
     private int finishDaysLate;
     @Column(name = "duration_increase_days")
     private int durationIncreaseDays;
+    @Column(name = "trip_duration_days")
+    private int tripDurationDays;
     private BigDecimal maxBudget;
     private String tripType;
     private Integer preferredHotelRating;
@@ -83,6 +86,7 @@ public class TravelWatch {
         this.finishDaysEarly = 0;
         this.finishDaysLate = 0;
         this.durationIncreaseDays = 0;
+        this.tripDurationDays = (int) Math.max(1, ChronoUnit.DAYS.between(startDate, endDate));
         this.maxBudget = maxBudget;
         this.tripType = tripType;
         this.preferredHotelRating = preferredHotelRating;
@@ -111,6 +115,7 @@ public class TravelWatch {
     public int getFinishDaysEarly() { return finishDaysEarly; }
     public int getFinishDaysLate() { return finishDaysLate; }
     public int getDurationIncreaseDays() { return durationIncreaseDays; }
+    public int getTripDurationDays() { return tripDurationDays; }
     public BigDecimal getMaxBudget() { return maxBudget; }
     public String getTripType() { return tripType; }
     public Integer getPreferredHotelRating() { return preferredHotelRating; }
@@ -144,7 +149,7 @@ public class TravelWatch {
                                   LocalDate range3StartDate, LocalDate range3EndDate,
                                   int startDaysEarly, int startDaysLate,
                                   int finishDaysEarly, int finishDaysLate,
-                                  int durationIncreaseDays) {
+                                  int durationIncreaseDays, int tripDurationDays) {
         this.range2StartDate = range2StartDate;
         this.range2EndDate = range2EndDate;
         this.range3StartDate = range3StartDate;
@@ -154,6 +159,7 @@ public class TravelWatch {
         this.finishDaysEarly = finishDaysEarly;
         this.finishDaysLate = finishDaysLate;
         this.durationIncreaseDays = durationIncreaseDays;
+        this.tripDurationDays = Math.max(1, tripDurationDays);
         this.flexibilityDays = Math.max(Math.max(startDaysEarly, startDaysLate),
             Math.max(Math.max(finishDaysEarly, finishDaysLate), durationIncreaseDays));
         this.updatedAt = Instant.now();

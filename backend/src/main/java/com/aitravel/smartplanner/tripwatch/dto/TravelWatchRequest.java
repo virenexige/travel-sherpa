@@ -25,6 +25,7 @@ public record TravelWatchRequest(
     @Min(0) @Max(14) int finishDaysEarly,
     @Min(0) @Max(14) int finishDaysLate,
     @Min(0) @Max(14) int durationIncreaseDays,
+    @Min(1) @Max(60) int tripDurationDays,
     @DecimalMin("0.0") BigDecimal maxBudget,
     @NotBlank String tripType,
     @Min(1) @Max(5) Integer preferredHotelRating,
