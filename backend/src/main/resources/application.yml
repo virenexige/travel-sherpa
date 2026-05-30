@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: ai-travel-smart-planner
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/smart_travel_planner}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+server:
+  port: ${PORT:8080}
+
+app:
+  security:
+    jwt-secret: ${JWT_SECRET:change-me-change-me-change-me-change-me}
+    token-ttl-hours: ${JWT_TTL_HOURS:24}
+  providers:
+    amadeus:
+      api-key: ${AMADEUS_API_KEY:}
+    booking:
+      api-key: ${BOOKING_API_KEY:}
+    skyscanner:
+      api-key: ${SKYSCANNER_API_KEY:}
+  scheduler:
+    travel-watch-refresh-cron: ${TRAVEL_WATCH_REFRESH_CRON:0 0 */6 * * *}
+  alerts:
+    package-drop-threshold: 0.10
+    flight-drop-threshold: 0.15
+    hotel-drop-threshold: 0.10
+
+logging:
+  level:
+    com.aitravel.smartplanner: INFO

@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  flyway:
+    enabled: false
+app:
+  security:
+    jwt-secret: test-secret-test-secret-test-secret-test
+    token-ttl-hours: 1
+  alerts:
+    package-drop-threshold: 0.10
+    flight-drop-threshold: 0.15
+    hotel-drop-threshold: 0.10
+  scheduler:
+    travel-watch-refresh-cron: "0 0 */6 * * *"
